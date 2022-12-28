@@ -7,7 +7,11 @@ There is quite a bit of refactoring possible for more efficient and better reada
 <p>Have fun coding!</p>
 
 ## To run:
-<p>First clone this repo:</p>
+<p>(Install rustup/cargo if not already installed)</p>
+
+[www.rust-lang.org/tools/install](https://www.rust-lang.org/tools/install)
+
+<p>Clone this repo:</p>
 
 `git clone git@github.com:De-Zwaan/Fireworks.git`
 
