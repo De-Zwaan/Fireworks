@@ -1,3 +1,5 @@
+use rand::Rng;
+
 use crate::object::{Pos3D, PhysicsObject, Render};
 use crate::color::Color;
 use crate::star::Star;
@@ -37,6 +39,10 @@ impl PhysicsObject for Firework {
 
 impl Render for Firework {
     fn render(&self, screen: &mut [u8], size: PhysicalSize<u32>, t: f64) {
+        // Render all stars from current rocket
+        self.stars.iter().for_each(|s| {
+            s.render(screen, size, t);
+        });
         // Only render rockets that are alive
         if !self.is_alive {return;}
 
@@ -69,10 +75,24 @@ impl Firework {
 
         // If the rocket is not alive anymore
         if !self.is_alive {
+            // If the rocket is dead for the first tick
+            if self.stars_alive == -1 {
 
-        }
-    }
+                // Initialise a number of stars and push them to the list
+                (0..50).for_each(|_i| {
+                    Vec::push(&mut self.stars, Star::new(self.pos, self.vel, self.color));
+                });
+            }
 
+            // Update the amount of alive stars that came from this rocket
+            self.stars_alive = self.stars.len() as i32;
+
+            // Iterate over all stars
+            self.stars.iter_mut().for_each(|s| {
+                s.fly(dt);
+            });
+
+            self.stars.retain(|s| s.is_alive);
         }
     }
 
@@ -93,6 +113,8 @@ impl Firework {
 
         let age = rng.gen_range(4.0..9.0);
 
-        Self { pos, vel, age, color, is_alive: true }
+        let stars = Vec::new();
+
+        Self { pos, vel, age, color, is_alive: true, stars_alive: -1, stars, trail }
     }
 }
