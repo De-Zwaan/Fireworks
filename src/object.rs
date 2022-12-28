@@ -2,6 +2,19 @@ use std::ops;
 use instant::Duration;
 use winit::dpi::PhysicalSize;
 
+pub trait PhysicsObject {
+    fn pos(&self) -> Pos3D;
+    fn vel(&self) -> Pos3D;
+
+    fn calculate_forces(&self) -> Pos3D;
+
+    fn calculate_velocity(&self, forces: Pos3D, dt: Duration) -> Pos3D {
+        return self.vel() + forces * dt.as_secs_f64() as f64;
+    }
+    fn calculate_position(&self, dt: Duration) -> Pos3D {
+        return self.pos() + self.vel() * dt.as_secs_f64() as f64;
+    }
+}
 
 pub trait Render {
     fn render(&self, screen: &mut [u8], size: PhysicalSize<u32>, t: f64);

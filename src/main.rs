@@ -24,6 +24,8 @@ use winit::{
 const WIDTH: u32 = 600;
 const HEIGHT: u32 = 800;
 
+const MAX_FIREWORK: i32 = 20;
+
 fn main() -> Result<(), Error> {
     let event_loop = EventLoop::new();
 
@@ -48,6 +50,11 @@ fn main() -> Result<(), Error> {
 
     // Create a pixelarray
     let mut pixels: pixels::Pixels = PixelsBuilder::new(WIDTH, HEIGHT, surface_texture).build()?;
+    // Create an empty vec to store all rockets
+    let mut fireworks: Vec<Firework> = Vec::new();
+    let mut t: f64 = 0.0;
+    let mut last_render_time = instant::Instant::now();
+
     event_loop.run(move |event, _, control_flow| {
         control_flow.set_poll();
 
@@ -71,6 +78,41 @@ fn main() -> Result<(), Error> {
                 window.request_redraw();
             }
             Event::RedrawRequested(_) => {
+                // Calculate the framedelta
+                let now = instant::Instant::now();
+                let dt = now.duration_since(last_render_time);
+                last_render_time = now;
+
+                // Update time since start to update rotation
+                t += dt.as_secs_f64();
+                
+                // Get the window size
+                let size = window.inner_size();
+
+                // Get pixelbuffer
+                let screen = pixels.get_frame_mut();
+                for (_i, p) in screen.chunks_exact_mut(4).enumerate() {
+                    p.copy_from_slice(&[0x00, 0x00, 0x00, 0xff]);
+                }
+
+                fireworks.iter_mut().for_each(|r| {
+                    // Update firework physics
+                    r.fly(dt);
+
+                    // Draw rockets and their stars and trails
+                    r.render(screen, size, t);
+                });
+
+                // Remove all rockets without stars
+                fireworks.retain(|r| r.stars_alive != 0 || r.is_alive);                
+
+                // Add new rockets until there are FIREWORK_NUM rockets
+                (0..(MAX_FIREWORK as usize - fireworks.len())).for_each(|_| {
+                    if rand::thread_rng().gen_bool(0.01) {
+                        let color = *colors.choose(&mut rand::thread_rng()).unwrap();
+                        fireworks.push(Firework::new(color));
+                    }
+                });
 
                 // Render changed pixelbuffer to screen
                 if pixels
