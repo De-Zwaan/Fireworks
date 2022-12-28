@@ -54,6 +54,20 @@ fn main() -> Result<(), Error> {
 
     // Create an empty vec to store all rockets
     let mut fireworks: Vec<Firework> = Vec::new();
+    let mut ground_points: Vec<StaticPoint> = Vec::new();
+
+    (-100..=100).step_by(10).for_each(|i: i32| {
+        (-100..=100).step_by(10).for_each(|j: i32| {
+            ground_points.push(
+                StaticPoint::new(Pos3D {
+                    x: i as f64,
+                    y: 0.0,
+                    z: j as f64,
+                }, Color::Green)
+            )
+        })
+    });
+
     let mut t: f64 = 0.0;
     let mut last_render_time = instant::Instant::now();
 
@@ -96,6 +110,11 @@ fn main() -> Result<(), Error> {
                 for (_i, p) in screen.chunks_exact_mut(4).enumerate() {
                     p.copy_from_slice(&[0x00, 0x00, 0x00, 0xff]);
                 }
+
+                // Render all static points on the ground
+                ground_points.iter().enumerate().for_each(|(_, p)| {
+                    p.render(screen, size, t);
+                });
 
                 fireworks.iter_mut().for_each(|r| {
                     // Update firework physics
