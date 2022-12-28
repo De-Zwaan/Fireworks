@@ -50,6 +50,8 @@ fn main() -> Result<(), Error> {
 
     // Create a pixelarray
     let mut pixels: pixels::Pixels = PixelsBuilder::new(WIDTH, HEIGHT, surface_texture).build()?;
+    let colors = [Color::Red, Color::Orange, Color::Yellow, Color::Blue, Color::Purple];
+
     // Create an empty vec to store all rockets
     let mut fireworks: Vec<Firework> = Vec::new();
     let mut t: f64 = 0.0;

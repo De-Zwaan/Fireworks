@@ -3,6 +3,7 @@ use rand::Rng;
 use crate::object::{Pos3D, PhysicsObject, Render};
 use crate::color::Color;
 use crate::star::Star;
+use crate::trail::Trail;
 use instant::Duration;
 use winit::dpi::PhysicalSize;
 
@@ -43,6 +44,12 @@ impl Render for Firework {
         self.stars.iter().for_each(|s| {
             s.render(screen, size, t);
         });
+
+        // Render all points in the trail of the rocket
+        self.trail.iter().for_each(|tr| {
+            tr.render(screen, size, t)
+        });
+        
         // Only render rockets that are alive
         if !self.is_alive {return;}
 
@@ -69,6 +76,11 @@ impl Firework {
             self.vel = self.calculate_velocity(forces, dt);
             self.pos = self.calculate_position(dt);
 
+            // Draw a trail
+            self.trail.push(Trail::new(self.pos, self.color));
+            // remove first entry from tail
+            self.trail.remove(0);
+
         } else {
             self.is_alive = false;
         }
@@ -82,6 +94,11 @@ impl Firework {
                 (0..50).for_each(|_i| {
                     Vec::push(&mut self.stars, Star::new(self.pos, self.vel, self.color));
                 });
+            }
+
+            // Remove last trail particles from list
+            if self.trail.len() > 0 {
+                self.trail.remove(0);
             }
 
             // Update the amount of alive stars that came from this rocket
@@ -114,6 +131,8 @@ impl Firework {
         let age = rng.gen_range(4.0..9.0);
 
         let stars = Vec::new();
+
+        let trail: Vec<Trail> = [Trail::new(pos, color)].repeat(rng.gen_range(10..20));
 
         Self { pos, vel, age, color, is_alive: true, stars_alive: -1, stars, trail }
     }

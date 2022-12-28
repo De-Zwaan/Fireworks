@@ -9,6 +9,7 @@ use crate::{
         Render
     }, 
     color::Color, 
+    trail::Trail
 };
 
 const GRAVITY: f64 = -9.81; 
@@ -55,6 +56,9 @@ impl Render for Star {
         // Only render alive stars
         if !self.is_alive {return;}
 
+        self.trail.iter().for_each(|tr| {
+            tr.render(screen, size, t)
+        });
 
         let proj = self.pos.project(size, t);
 
@@ -72,13 +76,21 @@ impl Star {
         self.age -= dt.as_secs_f64();
 
         if self.age <= 0.0 {
+            if self.trail.len() == 0 {
                 self.is_alive = false;
+            } else {
+                self.trail.remove(0);
+            }
         }
         
         // Move the star
         let forces = self.calculate_forces();
         self.vel = self.calculate_velocity(forces, dt);
         self.pos = self.calculate_position(dt);
+
+        self.trail.push(Trail::new(self.pos, self.color));
+        self.trail.remove(0);
+    }
 
     pub fn new(pos: Pos3D, _r_vel: Pos3D, color: Color) -> Self {
         let mut rng = rand::thread_rng();
@@ -91,6 +103,7 @@ impl Star {
 
         let age = rng.gen_range(1.5..=2.0);
 
+        let trail = [Trail::new(pos, color)].repeat(rng.gen_range(10..50));
 
         Self { pos, vel, color, age, is_alive: true, trail }
     }
