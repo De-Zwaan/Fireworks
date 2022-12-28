@@ -9,7 +9,7 @@ There is quite a bit of refactoring possible for more efficient and better reada
 ## To run:
 <p>First clone this repo:</p>
 
-`git clone git@github.com/De-Zwaan/Fireworks`
+`git clone git@github.com:De-Zwaan/Fireworks.git`
 
 <p>Enter the root of the project:</p>
 
